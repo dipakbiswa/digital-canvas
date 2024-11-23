@@ -2,20 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  height: 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.btn {
+  @apply px-4 py-2 text-2xl rounded-md shadow-md hover:shadow-lg bg-gray-800 hover:bg-gray-900 transition text-white font-bold;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+.btn-2 {
+  @apply px-4 py-2 mt-5 text-2xl rounded-md shadow-md hover:shadow-lg bg-gray-800 hover:bg-gray-900 transition text-white font-bold;
+}
+
+.btn-3 {
+  @apply px-4 py-2 mt-5 text-2xl rounded-md shadow-md hover:shadow-lg bg-gray-800 hover:bg-gray-900 transition text-white font-bold;
+}
+
+.btn-4 {
+  @apply px-4 py-2 mt-5 text-2xl rounded-md shadow-md hover:shadow-lg bg-gray-800 hover:bg-gray-900 transition text-white font-bold;
 }
