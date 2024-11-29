@@ -53,7 +53,7 @@ const Sidebar = ({
       } fixed md:relative md:translate-x-0 z-30 inset-y-0 left-0 w-64 bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out flex flex-col h-full`}
     >
       <div className="flex justify-between items-center mb-4 md:hidden">
-        <h2 className="text-xl font-bold">Chat History</h2>
+        {/* <h2 className="text-xl font-bold">Chat History</h2> */}
         <button onClick={toggleSidebar} className="text-white">
           <X className="w-6 h-6" />
         </button>

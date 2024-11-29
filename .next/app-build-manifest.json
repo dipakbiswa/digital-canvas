@@ -6,6 +6,11 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
+    "/(site)/signin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(site)/signin/page.js"
+    ],
     "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -16,10 +21,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(site)/page.js"
     ],
-    "/(site)/signin/page": [
+    "/(site)/signup/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(site)/signin/page.js"
+      "static/chunks/app/(site)/signup/page.js"
     ]
   }
 }

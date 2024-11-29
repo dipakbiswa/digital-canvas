@@ -11,6 +11,7 @@ import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuthContext } from "@/context/AuthContext";
 import https from "https";
+import dynamic from "next/dynamic";
 
 const App = () => {
   const [messages, setMessages] = useState([]);
@@ -27,7 +28,9 @@ const App = () => {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const { user } = useAuthContext();
 
-  const API_KEY = "AIzaSyBXMvHjeo0yTJ5EhjZeBXmIXKlMHFVdH6k";
+  // const API_KEY = "AIzaSyBXMvHjeo0yTJ5EhjZeBXmIXKlMHFVdH6k";
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+  // console.log(API_KEY);
   const genAI = new GoogleGenerativeAI(API_KEY);
 
   useEffect(() => {
@@ -73,6 +76,9 @@ const App = () => {
       "\\food-nutrition": "food-nutrition",
       "\\object-detection-img-op": "object-detection-img-op",
       "\\deepfake-detection": "deepfake-detection",
+      "\\ai-detection": "ai-detection",
+      "\\suggest-product": "suggest-product",
+      "\\find-location": "find-location",
     };
     const [modelCommand, ...promptParts] = command.split(" ");
     const selectedModel = modelMap[modelCommand];
@@ -133,10 +139,16 @@ const App = () => {
         case "deepfake-detection":
           deepfakeDetection();
           break;
-        // case "suggest-product":
-        //   // prompt = userPrompt || "";
-        //   suggestProducts();
-        //   break;
+        case "ai-detection":
+          aiDetection();
+          break;
+        case "suggest-product":
+          // prompt = userPrompt || "";
+          suggestProducts();
+          break;
+        case "find-location":
+          findLocation();
+          break;
         default:
           throw new Error("Invalid ML model selected");
       }
@@ -164,6 +176,7 @@ const App = () => {
       async function foodNutrition() {
         const formData = new FormData();
         formData.append("image", uploadedImage);
+        const foodvisor_api = process.env.NEXT_PUBLIC_FOODVISOR_API;
 
         try {
           const apiResponse = await axios.post(
@@ -171,8 +184,7 @@ const App = () => {
             formData,
             {
               headers: {
-                Authorization:
-                  "Api-Key m4cKLZSr.Jhac11mupXVwocJHKpYx5UVJ3jC1mLxI",
+                Authorization: `Api-Key ${foodvisor_api}`,
                 "Content-Type": "multipart/form-data",
               },
             }
@@ -221,11 +233,12 @@ const App = () => {
       }
 
       async function deepfakeDetection() {
+        const deepfake_api = process.env.NEXT_PUBLIC_DEEPFAKE_API;
         const formData = new FormData();
         formData.append("media", uploadedImage);
         formData.append("models", "deepfake");
-        formData.append("api_user", "1280634117");
-        formData.append("api_secret", "6nfgA4gRtHgMRgknQsUneqZVZGF4ENef");
+        formData.append("api_user", process.env.NEXT_PUBLIC_DEEPFAKE_USER);
+        formData.append("api_secret", deepfake_api);
         try {
           const response = await axios.post(
             "deepfake-detection/1.0/check.json",
@@ -255,75 +268,152 @@ const App = () => {
         }
       }
 
-      // async function suggestProducts() {
-      //   try {
-      //     const prompt =
-      //       "only name the products with color found in this image";
-      //     console.log("Generating content with prompt:", prompt);
-      //     const result = await geminiModel.generateContent([
-      //       prompt,
-      //       { inlineData: { data: imageData, mimeType: uploadedImage.type } },
-      //     ]);
-      //     const response = await result.response;
-      //     const text = response.text();
-      //     console.log("Generated text:", text);
+      async function aiDetection() {
+        const deepfake_api = process.env.NEXT_PUBLIC_DEEPFAKE_API;
+        const formData = new FormData();
+        formData.append("media", uploadedImage);
+        formData.append("models", "genai");
+        formData.append("api_user", process.env.NEXT_PUBLIC_DEEPFAKE_USER);
+        formData.append("api_secret", deepfake_api);
+        try {
+          const response = await axios.post(
+            "deepfake-detection/1.0/check.json",
+            formData,
+            {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          const aiScore = response.data.type.ai_generated;
+          const result = await geminiModel.generateContent([
+            `I am providing you a AI score. This score is a float between 0 and 1. The higher the value, the higher the confidence that the image is a AI generated image, the score is: ${aiScore}. Acording to that score generate a response for user that this image is AI generated or not, and don't provide internal details.`,
+          ]);
+          const geminiResponse = await result.response;
+          const text = geminiResponse.text();
 
-      //     console.log("Fetching product suggestions from API");
-      //     const params = {
-      //       engine: "google_shopping",
-      //       q: text,
-      //       location: "India",
-      //       hl: "en",
-      //       gl: "us",
-      //       api_key:
-      //         "94cee5c53c3d963cddffa474d78ccf12714f5478b507d26130dda982a78b9186",
-      //     };
-      //     console.log("Attempting to fetch from SerpAPI with params:", params);
-      //     const apiResponse = await axios.get("suggest-product/search", {
-      //       params,
-      //     });
-      //     console.log("API response received:", apiResponse.status);
-      //     const jsonData = apiResponse.data;
-      //     console.log("API response data:", jsonData);
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: text },
+          ]);
+        } catch (error) {
+          console.error("Error:", error);
+          throw error;
+        }
+      }
 
-      //     if (
-      //       jsonData.shopping_results &&
-      //       jsonData.shopping_results.length > 0
-      //     ) {
-      //       const productSuggestions = jsonData.shopping_results
-      //         .slice(0, 5)
-      //         .map((item) => `${item.title} - $${item.price}`);
+      async function suggestProducts() {
+        try {
+          const prompt =
+            "only name the products with color found in this image";
+          console.log("Generating content with prompt:", prompt);
+          const result = await geminiModel.generateContent([
+            prompt,
+            { inlineData: { data: imageData, mimeType: uploadedImage.type } },
+          ]);
+          const response = await result.response;
+          const text = response.text();
+          // console.log("Generated text:", text);
 
-      //       setMessages((prev) => [
-      //         ...prev,
-      //         {
-      //           role: "assistant",
-      //           content: `Based on the image, here are some product suggestions:\n\n${productSuggestions.join(
-      //             "\n"
-      //           )}`,
-      //         },
-      //       ]);
-      //     } else {
-      //       throw new Error("No shopping results found in the API response");
-      //     }
-      //   } catch (error) {
-      //     console.error("Error in suggestProducts:", error);
-      //     let errorMessage =
-      //       "Sorry, I encountered an error while fetching product suggestions. Please try again later.";
-      //     if (error.response) {
-      //       console.error("Error response:", error.response.data);
-      //       errorMessage +=
-      //         " Error details: " + JSON.stringify(error.response.data);
-      //     }
-      //     setMessages((prev) => [
-      //       ...prev,
-      //       {
-      //         role: "assistant",
-      //         content: errorMessage,
-      //       },
-      //     ]);
-      //   }
-      // }
+          // console.log("Fetching product suggestions from API");
+          // const params = {
+          //   engine: "google_shopping",
+          //   q: text,
+          //   location: "India",
+          //   hl: "en",
+          //   gl: "us",
+          //   api_key:
+          //     "94cee5c53c3d963cddffa474d78ccf12714f5478b507d26130dda982a78b9186",
+          // };
+          // console.log("Attempting to fetch from SerpAPI with params:", params);
+          // const apiResponse = await axios.get("suggest-product/search", {
+          //   params,
+          // });
+          // console.log("API response received:", apiResponse.status);
+          // const jsonData = apiResponse.data;
+          // console.log("API response data:", jsonData);
+
+          // if (
+          //   jsonData.shopping_results &&
+          //   jsonData.shopping_results.length > 0
+          // ) {
+          //   const productSuggestions = jsonData.shopping_results
+          //     .slice(0, 5)
+          //     .map((item) => `${item.title} - $${item.price}`);
+
+          //   setMessages((prev) => [
+          //     ...prev,
+          //     {
+          //       role: "assistant",
+          //       content: `Based on the image, here are some product suggestions:\n\n${productSuggestions.join(
+          //         "\n"
+          //       )}`,
+          //     },
+          //   ]);
+          // } else {
+          //   throw new Error("No shopping results found in the API response");
+          // }
+        } catch (error) {
+          console.error("Error in suggestProducts:", error);
+          let errorMessage =
+            "Sorry, I encountered an error while fetching product suggestions. Please try again later.";
+          if (error.response) {
+            console.error("Error response:", error.response.data);
+            errorMessage +=
+              " Error details: " + JSON.stringify(error.response.data);
+          }
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: errorMessage,
+            },
+          ]);
+        }
+      }
+
+      async function findLocation() {
+        const prompt = "find the name of the location in the image";
+        const result = await geminiModel.generateContent([
+          prompt,
+          { inlineData: { data: imageData, mimeType: uploadedImage.type } },
+        ]);
+        const response = await result.response;
+        const text = response.text();
+
+        try {
+          const response = await axios.get(
+            "https://api.hasdata.com/scrape/google-maps/search",
+            {
+              params: {
+                q: text,
+              },
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": process.env.NEXT_PUBLIC_MAPS_API,
+              },
+            }
+          );
+          const apiResponse = response.data.localResults;
+
+          // const result = await geminiModel.generateContent([
+          //   `I am providing you a AI score. This score is a float between 0 and 1. The higher the value, the higher the confidence that the image is a AI generated image, the score is: ${aiScore}. Acording to that score generate a response for user that this image is AI generated or not, and don't provide internal details.`,
+          // ]);
+          // const geminiResponse = await result.response;
+          // const text = geminiResponse.text();
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: text,
+            },
+          ]);
+        } catch (error) {
+          console.error("Error:", error);
+          throw error;
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -464,6 +554,9 @@ const App = () => {
         "\\food-nutrition",
         "\\object-detection-img-op",
         "\\deepfake-detection",
+        "\\ai-detection",
+        "\\suggest-product",
+        "\\find-location",
       ];
       const filteredModels = availableModels.filter((model) =>
         model.startsWith(inputValue)
@@ -569,4 +662,5 @@ const App = () => {
   );
 };
 
-export default App;
+// export default App;
+export default dynamic(() => Promise.resolve(App), { ssr: false });

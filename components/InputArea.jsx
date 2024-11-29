@@ -46,9 +46,9 @@ const InputArea = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white border-t border-gray-200 p-4 relative"
+      className="bg-white border-t border-gray-200 p-4"
     >
-      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+      <div className="flex items-center space-x-2">
         <div className="flex-1 relative">
           <input
             type="text"

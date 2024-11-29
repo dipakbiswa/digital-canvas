@@ -54,6 +54,7 @@ const MessageList = ({
               </div>
             )}
             <p className="break-words">{message.content}</p>
+            <component />
             {message.image && <img src={message.image} />}
             {message.role === "assistant" && (
               <div className="mt-2 flex space-x-2">
