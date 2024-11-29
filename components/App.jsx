@@ -28,13 +28,9 @@ const App = () => {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const { user } = useAuthContext();
 
-<<<<<<< HEAD
   // const API_KEY = "AIzaSyBXMvHjeo0yTJ5EhjZeBXmIXKlMHFVdH6k";
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
   // console.log(API_KEY);
-=======
-  const API_KEY = "YOUR_GEMINI_API_KEY";
->>>>>>> 5e768ac8f6ff9ef0635f0533597240ea602fa141
   const genAI = new GoogleGenerativeAI(API_KEY);
 
   useEffect(() => {
