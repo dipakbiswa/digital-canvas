@@ -77,8 +77,6 @@ const App = () => {
       "\\object-detection-img-op": "object-detection-img-op",
       "\\deepfake-detection": "deepfake-detection",
       "\\ai-detection": "ai-detection",
-      "\\suggest-product": "suggest-product",
-      "\\find-location": "find-location",
     };
     const [modelCommand, ...promptParts] = command.split(" ");
     const selectedModel = modelMap[modelCommand];
@@ -142,12 +140,12 @@ const App = () => {
         case "ai-detection":
           aiDetection();
           break;
-        case "suggest-product":
-          // prompt = userPrompt || "";
-          suggestProducts();
-          break;
-        case "find-location":
-          findLocation();
+          // case "suggest-product":
+          //   // prompt = userPrompt || "";
+          //   suggestProducts();
+          //   break;
+          // case "find-location":
+          //   findLocation();
           break;
         default:
           throw new Error("Invalid ML model selected");
@@ -302,118 +300,118 @@ const App = () => {
         }
       }
 
-      async function suggestProducts() {
-        try {
-          const prompt =
-            "only name the products with color found in this image";
-          console.log("Generating content with prompt:", prompt);
-          const result = await geminiModel.generateContent([
-            prompt,
-            { inlineData: { data: imageData, mimeType: uploadedImage.type } },
-          ]);
-          const response = await result.response;
-          const text = response.text();
-          // console.log("Generated text:", text);
+      // async function suggestProducts() {
+      //   try {
+      //     const prompt =
+      //       "only name the products with color found in this image";
+      //     console.log("Generating content with prompt:", prompt);
+      //     const result = await geminiModel.generateContent([
+      //       prompt,
+      //       { inlineData: { data: imageData, mimeType: uploadedImage.type } },
+      //     ]);
+      //     const response = await result.response;
+      //     const text = response.text();
+      //     // console.log("Generated text:", text);
 
-          // console.log("Fetching product suggestions from API");
-          // const params = {
-          //   engine: "google_shopping",
-          //   q: text,
-          //   location: "India",
-          //   hl: "en",
-          //   gl: "us",
-          //   api_key:
-          //     "94cee5c53c3d963cddffa474d78ccf12714f5478b507d26130dda982a78b9186",
-          // };
-          // console.log("Attempting to fetch from SerpAPI with params:", params);
-          // const apiResponse = await axios.get("suggest-product/search", {
-          //   params,
-          // });
-          // console.log("API response received:", apiResponse.status);
-          // const jsonData = apiResponse.data;
-          // console.log("API response data:", jsonData);
+      //     // console.log("Fetching product suggestions from API");
+      //     // const params = {
+      //     //   engine: "google_shopping",
+      //     //   q: text,
+      //     //   location: "India",
+      //     //   hl: "en",
+      //     //   gl: "us",
+      //     //   api_key:
+      //     //     "94cee5c53c3d963cddffa474d78ccf12714f5478b507d26130dda982a78b9186",
+      //     // };
+      //     // console.log("Attempting to fetch from SerpAPI with params:", params);
+      //     // const apiResponse = await axios.get("suggest-product/search", {
+      //     //   params,
+      //     // });
+      //     // console.log("API response received:", apiResponse.status);
+      //     // const jsonData = apiResponse.data;
+      //     // console.log("API response data:", jsonData);
 
-          // if (
-          //   jsonData.shopping_results &&
-          //   jsonData.shopping_results.length > 0
-          // ) {
-          //   const productSuggestions = jsonData.shopping_results
-          //     .slice(0, 5)
-          //     .map((item) => `${item.title} - $${item.price}`);
+      //     // if (
+      //     //   jsonData.shopping_results &&
+      //     //   jsonData.shopping_results.length > 0
+      //     // ) {
+      //     //   const productSuggestions = jsonData.shopping_results
+      //     //     .slice(0, 5)
+      //     //     .map((item) => `${item.title} - $${item.price}`);
 
-          //   setMessages((prev) => [
-          //     ...prev,
-          //     {
-          //       role: "assistant",
-          //       content: `Based on the image, here are some product suggestions:\n\n${productSuggestions.join(
-          //         "\n"
-          //       )}`,
-          //     },
-          //   ]);
-          // } else {
-          //   throw new Error("No shopping results found in the API response");
-          // }
-        } catch (error) {
-          console.error("Error in suggestProducts:", error);
-          let errorMessage =
-            "Sorry, I encountered an error while fetching product suggestions. Please try again later.";
-          if (error.response) {
-            console.error("Error response:", error.response.data);
-            errorMessage +=
-              " Error details: " + JSON.stringify(error.response.data);
-          }
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: errorMessage,
-            },
-          ]);
-        }
-      }
+      //     //   setMessages((prev) => [
+      //     //     ...prev,
+      //     //     {
+      //     //       role: "assistant",
+      //     //       content: `Based on the image, here are some product suggestions:\n\n${productSuggestions.join(
+      //     //         "\n"
+      //     //       )}`,
+      //     //     },
+      //     //   ]);
+      //     // } else {
+      //     //   throw new Error("No shopping results found in the API response");
+      //     // }
+      //   } catch (error) {
+      //     console.error("Error in suggestProducts:", error);
+      //     let errorMessage =
+      //       "Sorry, I encountered an error while fetching product suggestions. Please try again later.";
+      //     if (error.response) {
+      //       console.error("Error response:", error.response.data);
+      //       errorMessage +=
+      //         " Error details: " + JSON.stringify(error.response.data);
+      //     }
+      //     setMessages((prev) => [
+      //       ...prev,
+      //       {
+      //         role: "assistant",
+      //         content: errorMessage,
+      //       },
+      //     ]);
+      //   }
+      // }
 
-      async function findLocation() {
-        const prompt = "find the name of the location in the image";
-        const result = await geminiModel.generateContent([
-          prompt,
-          { inlineData: { data: imageData, mimeType: uploadedImage.type } },
-        ]);
-        const response = await result.response;
-        const text = response.text();
+      // async function findLocation() {
+      //   const prompt = "find the name of the location in the image";
+      //   const result = await geminiModel.generateContent([
+      //     prompt,
+      //     { inlineData: { data: imageData, mimeType: uploadedImage.type } },
+      //   ]);
+      //   const response = await result.response;
+      //   const text = response.text();
 
-        try {
-          const response = await axios.get(
-            "https://api.hasdata.com/scrape/google-maps/search",
-            {
-              params: {
-                q: text,
-              },
-              headers: {
-                "Content-Type": "application/json",
-                "x-api-key": process.env.NEXT_PUBLIC_MAPS_API,
-              },
-            }
-          );
-          const apiResponse = response.data.localResults;
+      //   try {
+      //     const response = await axios.get(
+      //       "https://api.hasdata.com/scrape/google-maps/search",
+      //       {
+      //         params: {
+      //           q: text,
+      //         },
+      //         headers: {
+      //           "Content-Type": "application/json",
+      //           "x-api-key": process.env.NEXT_PUBLIC_MAPS_API,
+      //         },
+      //       }
+      //     );
+      //     const apiResponse = response.data.localResults;
 
-          // const result = await geminiModel.generateContent([
-          //   `I am providing you a AI score. This score is a float between 0 and 1. The higher the value, the higher the confidence that the image is a AI generated image, the score is: ${aiScore}. Acording to that score generate a response for user that this image is AI generated or not, and don't provide internal details.`,
-          // ]);
-          // const geminiResponse = await result.response;
-          // const text = geminiResponse.text();
+      //     // const result = await geminiModel.generateContent([
+      //     //   `I am providing you a AI score. This score is a float between 0 and 1. The higher the value, the higher the confidence that the image is a AI generated image, the score is: ${aiScore}. Acording to that score generate a response for user that this image is AI generated or not, and don't provide internal details.`,
+      //     // ]);
+      //     // const geminiResponse = await result.response;
+      //     // const text = geminiResponse.text();
 
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: text,
-            },
-          ]);
-        } catch (error) {
-          console.error("Error:", error);
-          throw error;
-        }
-      }
+      //     setMessages((prev) => [
+      //       ...prev,
+      //       {
+      //         role: "assistant",
+      //         content: text,
+      //       },
+      //     ]);
+      //   } catch (error) {
+      //     console.error("Error:", error);
+      //     throw error;
+      //   }
+      // }
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [
@@ -555,8 +553,6 @@ const App = () => {
         "\\object-detection-img-op",
         "\\deepfake-detection",
         "\\ai-detection",
-        "\\suggest-product",
-        "\\find-location",
       ];
       const filteredModels = availableModels.filter((model) =>
         model.startsWith(inputValue)
